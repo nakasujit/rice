@@ -103,7 +103,7 @@
     justify-content:center;
     text-align:center;
     padding:18px;
-    margin-bottom:22px;
+    margin-bottom:12px;
     cursor:pointer;
     overflow:hidden;
     transition: border-color 0.2s ease, background 0.2s ease;
@@ -147,6 +147,34 @@
     letter-spacing:0.05em;
   }
   #fileInput{ display:none; }
+  #cameraInput{ display:none; }
+
+  /* 写真の選び方ボタン（撮影 / ライブラリ） */
+  .source-buttons{
+    display:flex;
+    gap:10px;
+    margin-bottom:22px;
+  }
+  .source-btn{
+    -webkit-tap-highlight-color: transparent;
+    appearance:none;
+    cursor:pointer;
+    flex:1;
+    border:1px solid var(--ine);
+    background:#fff;
+    color:var(--ine-deep);
+    font-family:inherit;
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:0.04em;
+    padding:11px 0;
+    border-radius:999px;
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+  .source-btn:active{
+    background:var(--paper-deep);
+    transform:translateY(1px);
+  }
 
   /* メモ欄 */
   textarea{
@@ -212,6 +240,7 @@
     border-top-color:var(--ine);
     border-radius:50%;
     animation: spin 0.8s linear infinite;
+    flex-shrink:0;
   }
   @keyframes spin{ to{ transform:rotate(360deg); } }
 
@@ -234,6 +263,23 @@
     margin-top:28px;
   }
   .result.show{ display:block; }
+
+  /* 結果カードがふわっと現れるアニメーション */
+  @keyframes rise-in{
+    from{ opacity:0; transform:translateY(10px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+  .result.show .stage-card,
+  .result.show .todo-card,
+  .result.show .note-card,
+  .result.show .result-actions{
+    animation: rise-in 0.4s ease both;
+  }
+  .result.show .todo-card:nth-child(1){ animation-delay:0.08s; }
+  .result.show .todo-card:nth-child(2){ animation-delay:0.16s; }
+  .result.show .todo-card:nth-child(3){ animation-delay:0.24s; }
+  .result.show .todo-card:nth-child(4){ animation-delay:0.32s; }
+  .result.show .todo-card:nth-child(5){ animation-delay:0.40s; }
 
   .stage-card{
     background:#fff;
@@ -258,6 +304,14 @@
     font-size:13px;
     line-height:1.8;
     color:var(--ink);
+  }
+  .result-date{
+    font-size:11px;
+    color:var(--ink-soft);
+    letter-spacing:0.05em;
+    margin-top:10px;
+    padding-top:10px;
+    border-top:1px dashed var(--paper-deep);
   }
 
   /* ToDoカード */
@@ -331,6 +385,33 @@
     margin-top:6px;
   }
 
+  /* 結果の共有・再診断ボタン */
+  .result-actions{
+    display:flex;
+    gap:10px;
+    margin-top:16px;
+  }
+  .action-btn{
+    -webkit-tap-highlight-color: transparent;
+    appearance:none;
+    cursor:pointer;
+    flex:1;
+    border:1px solid var(--ine);
+    background:#fff;
+    color:var(--ine-deep);
+    font-family:inherit;
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:0.04em;
+    padding:12px 0;
+    border-radius:999px;
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+  .action-btn:active{
+    background:var(--paper-deep);
+    transform:translateY(1px);
+  }
+
   footer{
     text-align:center;
     font-size:11px;
@@ -338,6 +419,151 @@
     margin-top:30px;
     letter-spacing:0.05em;
     line-height:1.8;
+  }
+
+  /* タブ切り替え（診断／履歴） */
+  .tab-bar{
+    display:flex;
+    gap:8px;
+    margin-bottom:20px;
+  }
+  .tab-btn{
+    -webkit-tap-highlight-color: transparent;
+    appearance:none;
+    cursor:pointer;
+    flex:1;
+    border:1px solid var(--paper-deep);
+    background:#fff;
+    color:var(--ink-soft);
+    font-family:inherit;
+    font-size:13px;
+    font-weight:700;
+    padding:10px 0;
+    border-radius:999px;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .tab-btn.active{
+    background:var(--ine);
+    border-color:var(--ine);
+    color:#fff;
+  }
+
+  /* 位置情報チェックボックス */
+  .geo-check{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin:-10px 0 22px;
+  }
+  .geo-check input{ flex-shrink:0; }
+
+  /* 履歴カード */
+  .history-empty{
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:13px;
+    padding:40px 0;
+  }
+  .history-card{
+    background:#fff;
+    border-radius:10px;
+    border:1px solid var(--paper-deep);
+    overflow:hidden;
+    margin-bottom:16px;
+  }
+  .history-card img{
+    width:100%;
+    max-height:200px;
+    object-fit:cover;
+    display:block;
+    background:var(--paper-deep);
+  }
+  .history-card-body{
+    padding:14px 16px;
+  }
+  .history-date{
+    font-size:11px;
+    color:var(--ink-soft);
+    letter-spacing:0.04em;
+    margin-bottom:4px;
+  }
+  .history-stage{
+    font-family:"Shippori Mincho","Noto Serif JP",serif;
+    font-size:16px;
+    color:var(--ine-deep);
+    margin-bottom:6px;
+  }
+  .history-desc{
+    font-size:12.5px;
+    line-height:1.7;
+    color:var(--ink);
+    margin-bottom:8px;
+  }
+  .history-memo{
+    font-size:12px;
+    color:var(--ink-soft);
+    background:var(--paper-deep);
+    border-radius:6px;
+    padding:8px 10px;
+    margin-bottom:8px;
+  }
+  .history-map-link{
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    font-size:12px;
+    color:var(--ine-deep);
+    text-decoration:none;
+    font-weight:700;
+  }
+
+  /* 履歴内の「やることリスト」開閉 */
+  .history-todos{
+    margin-bottom:8px;
+  }
+  .history-todos summary{
+    cursor:pointer;
+    font-size:12px;
+    font-weight:700;
+    color:var(--ine-deep);
+    letter-spacing:0.04em;
+    padding:6px 0;
+    -webkit-tap-highlight-color: transparent;
+    list-style:none;
+  }
+  .history-todos summary::-webkit-details-marker{ display:none; }
+  .history-todos summary::before{
+    content:"▸ ";
+  }
+  .history-todos[open] summary::before{
+    content:"▾ ";
+  }
+  .history-todo-item{
+    display:flex;
+    align-items:baseline;
+    gap:6px;
+    font-size:12.5px;
+    line-height:1.7;
+    color:var(--ink);
+    padding:4px 0 4px 6px;
+  }
+  .history-todo-dot{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:var(--ine);
+    flex-shrink:0;
+    position:relative;
+    top:-1px;
+  }
+  .history-todo-item.priority-high .history-todo-dot{ background:var(--warn); }
+  .history-todo-item.priority-mid .history-todo-dot{ background:var(--hodo); }
+  .history-todo-timing{
+    font-size:11px;
+    color:var(--ink-soft);
+    white-space:nowrap;
   }
 </style>
 </head>
@@ -350,6 +576,13 @@
 
 <main>
 
+  <div class="tab-bar">
+    <button type="button" class="tab-btn active" id="diagnoseTabBtn">📷 診断する</button>
+    <button type="button" class="tab-btn" id="historyTabBtn">📖 過去の履歴</button>
+  </div>
+
+  <div id="diagnoseView">
+
   <div class="section-label"><span class="num">1</span>田んぼの写真</div>
   <div class="upload-area" id="uploadArea">
     <div id="uploadPlaceholder">
@@ -359,19 +592,32 @@
         <strong>稲・畦・水面・雑草</strong>などが<br>わかる写真がおすすめです
       </div>
     </div>
-    <img id="previewImg" style="display:none;">
+    <img id="previewImg" alt="選択した田んぼの写真" style="display:none;">
     <div class="retake-badge" id="retakeBadge" style="display:none;">タップして変更</div>
   </div>
-  <input type="file" id="fileInput" accept="image/*" capture="environment">
+
+  <!-- 「ライブラリから選ぶ」と「撮影する」を分離。
+       ライブラリ用は capture を付けない → iPhoneでカメラロールから選べる -->
+  <div class="source-buttons">
+    <button type="button" class="source-btn" id="libraryBtn">🖼 写真を選ぶ</button>
+    <button type="button" class="source-btn" id="cameraBtn">📷 撮影する</button>
+  </div>
+  <input type="file" id="fileInput" accept="image/*">
+  <input type="file" id="cameraInput" accept="image/*" capture="environment">
 
   <div class="section-label"><span class="num">2</span>状況メモ（任意）</div>
   <textarea id="memo" placeholder="例：田植えから約2か月、品種はコシヒカリ、最近の天気は雨が多い、など"></textarea>
+
+  <label class="geo-check">
+    <input type="checkbox" id="geoCheckbox">
+    この場所を記録する（あとで履歴の地図から振り返れます）
+  </label>
 
   <button class="analyze-btn" id="analyzeBtn">この写真で診断する</button>
 
   <div class="loading" id="loading">
     <div class="spinner"></div>
-    <span>写真を確認しています…</span>
+    <span id="loadingText">写真を確認しています…</span>
   </div>
 
   <div class="error-box" id="errorBox"></div>
@@ -383,13 +629,31 @@
       <div class="stage-label">いまの生育ステージ（推定）</div>
       <div class="stage-value" id="stageValue">-</div>
       <div class="stage-desc" id="stageDesc">-</div>
+      <div class="result-date" id="resultDate"></div>
     </div>
 
     <div class="section-label"><span class="num">4</span>次にやることリスト</div>
     <div id="todoList"></div>
 
     <div class="note-card" id="noteCard"></div>
+
+    <div class="result-actions">
+      <button type="button" class="action-btn" id="shareBtn">📤 結果を共有</button>
+      <button type="button" class="action-btn" id="againBtn">🔄 別の写真で診断</button>
+    </div>
   </div>
+
+  </div><!-- /diagnoseView -->
+
+  <div id="historyView" style="display:none;">
+    <div class="section-label"><span class="num">📖</span>過去の診断履歴</div>
+    <div class="loading" id="historyLoading">
+      <div class="spinner"></div>
+      <span>読み込んでいます…</span>
+    </div>
+    <div class="error-box" id="historyErrorBox"></div>
+    <div id="historyList"></div>
+  </div><!-- /historyView -->
 
 </main>
 
@@ -401,43 +665,123 @@
 <script>
   const uploadArea = document.getElementById('uploadArea');
   const fileInput = document.getElementById('fileInput');
+  const cameraInput = document.getElementById('cameraInput');
+  const libraryBtn = document.getElementById('libraryBtn');
+  const cameraBtn = document.getElementById('cameraBtn');
   const uploadPlaceholder = document.getElementById('uploadPlaceholder');
   const previewImg = document.getElementById('previewImg');
   const retakeBadge = document.getElementById('retakeBadge');
   const analyzeBtn = document.getElementById('analyzeBtn');
   const loading = document.getElementById('loading');
+  const loadingText = document.getElementById('loadingText');
   const errorBox = document.getElementById('errorBox');
   const result = document.getElementById('result');
   const stageValue = document.getElementById('stageValue');
   const stageDesc = document.getElementById('stageDesc');
+  const resultDate = document.getElementById('resultDate');
   const todoList = document.getElementById('todoList');
   const noteCard = document.getElementById('noteCard');
+  const shareBtn = document.getElementById('shareBtn');
+  const againBtn = document.getElementById('againBtn');
   const memo = document.getElementById('memo');
+  const geoCheckbox = document.getElementById('geoCheckbox');
+
+  const diagnoseTabBtn = document.getElementById('diagnoseTabBtn');
+  const historyTabBtn = document.getElementById('historyTabBtn');
+  const diagnoseView = document.getElementById('diagnoseView');
+  const historyView = document.getElementById('historyView');
+  const historyLoading = document.getElementById('historyLoading');
+  const historyErrorBox = document.getElementById('historyErrorBox');
+  const historyList = document.getElementById('historyList');
+
+  // ↓↓↓ あなたの Supabase プロジェクトの Function URL に書き換えてください ↓↓↓
+  const DIAGNOSE_URL = "https://hwwwouxtffdnrsnxdrck.supabase.co/functions/v1/diagnose";
+  const HISTORY_URL = "https://hwwwouxtffdnrsnxdrck.supabase.co/functions/v1/history";
 
   let imageBase64 = null;
   let imageMediaType = null;
+  let lastResult = null;      // 共有用に直近の診断結果を保持
+  let lastResultDate = null;
 
-  uploadArea.addEventListener('click', () => fileInput.click());
-
-  fileInput.addEventListener('change', () => {
-    const file = fileInput.files[0];
-    if (!file) return;
-
-    imageMediaType = file.type;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const dataUrl = e.target.result;
-      imageBase64 = dataUrl.split(',')[1];
-
-      previewImg.src = dataUrl;
-      previewImg.style.display = 'block';
-      uploadPlaceholder.style.display = 'none';
-      retakeBadge.style.display = 'block';
-      uploadArea.classList.add('has-image');
-    };
-    reader.readAsDataURL(file);
+  // --- 「場所を記録する」チェックを前回の状態から復元 ---
+  const GEO_PREF_KEY = 'ine_todo_geo_checked';
+  try {
+    geoCheckbox.checked = localStorage.getItem(GEO_PREF_KEY) === '1';
+  } catch (e) { /* プライベートモード等でlocalStorageが使えない場合は無視 */ }
+  geoCheckbox.addEventListener('change', () => {
+    try {
+      localStorage.setItem(GEO_PREF_KEY, geoCheckbox.checked ? '1' : '0');
+    } catch (e) { /* 保存できなくても動作は続行 */ }
   });
+
+  // アップロード領域タップ＝ライブラリから選択（iPhoneでカメラロールが開く）
+  uploadArea.addEventListener('click', () => fileInput.click());
+  libraryBtn.addEventListener('click', () => fileInput.click());
+  cameraBtn.addEventListener('click', () => cameraInput.click());
+
+  fileInput.addEventListener('change', () => handleFile(fileInput.files[0]));
+  cameraInput.addEventListener('change', () => handleFile(cameraInput.files[0]));
+
+  function handleFile(file){
+    if (!file) return;
+    // iPhoneのHEICや大きすぎる写真に対応するため、
+    // 一度canvasに描画して「縮小したJPEG」に変換してから使う。
+    const objectUrl = URL.createObjectURL(file);
+    const img = new Image();
+
+    img.onload = () => {
+      const maxDim = 1568; // Anthropic推奨の長辺上限に合わせて縮小
+      let width = img.naturalWidth || img.width;
+      let height = img.naturalHeight || img.height;
+      if (width > maxDim || height > maxDim) {
+        const scale = maxDim / Math.max(width, height);
+        width = Math.round(width * scale);
+        height = Math.round(height * scale);
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+
+      const jpegDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+      imageBase64 = jpegDataUrl.split(',')[1];
+      imageMediaType = 'image/jpeg';
+
+      showPreview(jpegDataUrl);
+      URL.revokeObjectURL(objectUrl);
+    };
+
+    img.onerror = () => {
+      // canvasで読めない場合（ごく一部の古い環境のHEIC等）は、
+      // 元ファイルをそのまま読み込むフォールバック。
+      URL.revokeObjectURL(objectUrl);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target.result;
+        imageBase64 = dataUrl.split(',')[1];
+        imageMediaType = file.type || 'image/jpeg';
+        showPreview(dataUrl);
+      };
+      reader.onerror = () => {
+        errorBox.textContent = '写真を読み込めませんでした。別の写真でお試しください。';
+        errorBox.classList.add('show');
+      };
+      reader.readAsDataURL(file);
+    };
+
+    img.src = objectUrl;
+  }
+
+  function showPreview(dataUrl){
+    errorBox.classList.remove('show');
+    previewImg.src = dataUrl;
+    previewImg.style.display = 'block';
+    uploadPlaceholder.style.display = 'none';
+    retakeBadge.style.display = 'block';
+    uploadArea.classList.add('has-image');
+  }
 
   const icons = {
     weeding: "🌿",
@@ -461,6 +805,150 @@
     return '優先度：低';
   }
 
+  // 優先度の高い順（high → mid → low）に並べ替える
+  const priorityOrder = { high: 0, mid: 1, low: 2 };
+  function sortByPriority(todos){
+    return [...todos].sort((a, b) =>
+      (priorityOrder[a.priority] ?? 2) - (priorityOrder[b.priority] ?? 2)
+    );
+  }
+
+  // --- タブ切り替え（診断／履歴） ---
+  diagnoseTabBtn.addEventListener('click', () => {
+    diagnoseTabBtn.classList.add('active');
+    historyTabBtn.classList.remove('active');
+    diagnoseView.style.display = '';
+    historyView.style.display = 'none';
+  });
+
+  historyTabBtn.addEventListener('click', () => {
+    historyTabBtn.classList.add('active');
+    diagnoseTabBtn.classList.remove('active');
+    diagnoseView.style.display = 'none';
+    historyView.style.display = '';
+    loadHistory();
+  });
+
+  // --- 位置情報の取得（チェックが入っている場合のみ、診断ボタン押下時に取得） ---
+  function getLocationIfRequested(){
+    return new Promise((resolve) => {
+      if (!geoCheckbox.checked || !navigator.geolocation) {
+        resolve(null);
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        () => resolve(null), // 拒否・失敗しても診断は続行
+        { timeout: 8000 }
+      );
+    });
+  }
+
+  // --- 履歴の読み込み・描画 ---
+  async function loadHistory(){
+    historyErrorBox.classList.remove('show');
+    historyList.innerHTML = '';
+    historyLoading.classList.add('show');
+
+    try {
+      const response = await fetch(HISTORY_URL);
+      const data = await response.json();
+
+      if (!response.ok || data.error) {
+        throw new Error(data.error || '履歴の取得に失敗しました。');
+      }
+
+      renderHistory(data.items || []);
+    } catch (err) {
+      console.error(err);
+      historyErrorBox.textContent = navigator.onLine === false
+        ? '電波の届かない場所のようです。接続できる場所で、もう一度お試しください。'
+        : '履歴の読み込み中にエラーが発生しました。もう一度お試しください。';
+      historyErrorBox.classList.add('show');
+    } finally {
+      historyLoading.classList.remove('show');
+    }
+  }
+
+  function formatDate(iso){
+    const d = new Date(iso);
+    return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  }
+
+  // 履歴カード内の「やることリスト」（開閉式）を組み立てる
+  function buildHistoryTodos(todos){
+    if (!Array.isArray(todos) || !todos.length) return '';
+    const items = sortByPriority(todos).map(todo => `
+      <div class="history-todo-item priority-${escapeHtml(todo.priority || 'low')}">
+        <span class="history-todo-dot"></span>
+        <span>${escapeHtml(todo.title || '')}</span>
+        ${todo.timing ? `<span class="history-todo-timing">（${escapeHtml(todo.timing)}）</span>` : ''}
+      </div>
+    `).join('');
+    return `
+      <details class="history-todos">
+        <summary>このときの「やること」${todos.length}件を見る</summary>
+        ${items}
+      </details>
+    `;
+  }
+
+  function renderHistory(items){
+    if (!items.length) {
+      historyList.innerHTML = '<div class="history-empty">まだ診断履歴がありません。<br>「📷 診断する」タブから最初の診断をしてみましょう。</div>';
+      return;
+    }
+
+    historyList.innerHTML = '';
+    items.forEach(item => {
+      const result = item.result || {};
+      const card = document.createElement('div');
+      card.className = 'history-card';
+
+      const mapLink = (item.lat != null && item.lng != null)
+        ? `<a class="history-map-link" href="https://www.google.com/maps?q=${item.lat},${item.lng}" target="_blank" rel="noopener">🗺 地図で見る</a>`
+        : '';
+
+      card.innerHTML = `
+        ${item.image_url ? `<img src="${item.image_url}" alt="診断時の写真" loading="lazy">` : ''}
+        <div class="history-card-body">
+          <div class="history-date">${formatDate(item.created_at)}</div>
+          <div class="history-stage">${escapeHtml(result.stage || item.stage || '-')}</div>
+          <div class="history-desc">${escapeHtml(result.stage_desc || '')}</div>
+          ${item.memo ? `<div class="history-memo">${escapeHtml(item.memo)}</div>` : ''}
+          ${buildHistoryTodos(result.todos)}
+          ${mapLink}
+        </div>
+      `;
+      historyList.appendChild(card);
+    });
+  }
+
+  // --- 診断中のメッセージを段階的に切り替える ---
+  const loadingMessages = [
+    '写真を確認しています…',
+    '稲の生育ステージを推定しています…',
+    'やることリストを作成しています…',
+    'もう少しで完了します…'
+  ];
+  let loadingTimer = null;
+
+  function startLoadingMessages(){
+    let i = 0;
+    loadingText.textContent = loadingMessages[0];
+    loadingTimer = setInterval(() => {
+      i = Math.min(i + 1, loadingMessages.length - 1);
+      loadingText.textContent = loadingMessages[i];
+    }, 5000);
+  }
+
+  function stopLoadingMessages(){
+    if (loadingTimer) {
+      clearInterval(loadingTimer);
+      loadingTimer = null;
+    }
+  }
+
   analyzeBtn.addEventListener('click', async () => {
     errorBox.classList.remove('show');
     result.classList.remove('show');
@@ -471,113 +959,151 @@
       return;
     }
 
+    if (navigator.onLine === false) {
+      errorBox.textContent = '電波の届かない場所のようです。接続できる場所で、もう一度お試しください。';
+      errorBox.classList.add('show');
+      return;
+    }
+
     analyzeBtn.disabled = true;
     loading.classList.add('show');
+    startLoadingMessages();
 
-    const today = new Date();
-    const dateStr = `${today.getFullYear()}年${today.getMonth()+1}月${today.getDate()}日`;
     const memoText = memo.value.trim();
+    const location = await getLocationIfRequested();
 
-    const systemPrompt = `あなたは日本の水稲栽培に詳しい営農指導員です。
-ユーザーが送る田んぼの写真（と任意のメモ）から、稲の生育ステージを推定し、
-「いまから今後1〜2週間程度で行うべき作業（ToDo）」を整理してください。
-
-考慮する作業の例：除草剤・畔の草刈り・水管理（入水・落水・中干し）・追肥・病害虫の見回り・
-コンバインによる収穫準備・収穫後の乾燥・次作の準備　など。
-写真からはっきり判断できない場合は、複数の可能性を踏まえつつ、
-一般的な季節（${dateStr}頃）から考えて妥当な作業を提案してください。
-
-必ず次のJSON形式のみで回答してください。前置きや説明、Markdownのコードブロック記号は一切付けないでください。
-
-{
-  "stage": "推定される生育ステージ（例：分げつ期、出穂期、収穫期など）を15文字程度で",
-  "stage_desc": "そのステージと写真から読み取れる状況についての説明（80文字程度）",
-  "todos": [
-    {
-      "category": "weeding | herbicide | water | fertilizer | pest | combine | drying | inspection | other のいずれか",
-      "title": "作業名（10文字程度）",
-      "detail": "具体的な作業内容や注意点（60〜100文字程度）",
-      "timing": "目安となる時期や期限（例：今週中、出穂前まで、など20文字程度）",
-      "priority": "high | mid | low"
-    }
-  ],
-  "note": "全体への一言アドバイスや、写真から判断しきれない点への補足（80字程度）"
-}
-
-todosは3〜5件にしてください。`;
-
-    const userText = memoText
-      ? `状況メモ：${memoText}\n今日の日付：${dateStr}\nこの田んぼの写真を見て、上記フォーマットのJSONで回答してください。`
-      : `今日の日付：${dateStr}\nこの田んぼの写真を見て、上記フォーマットのJSONで回答してください。`;
+    // サーバーが応答しない場合に備えて90秒でタイムアウト
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 90000);
 
     try {
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
+      // Supabase Edge Function を呼ぶ（APIキーはサーバー側に秘匿）
+      const response = await fetch(DIAGNOSE_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
         body: JSON.stringify({
-          model: "claude-sonnet-4-6",
-          max_tokens: 1000,
-          system: systemPrompt,
-          messages: [
-            {
-              role: "user",
-              content: [
-                {
-                  type: "image",
-                  source: {
-                    type: "base64",
-                    media_type: imageMediaType || "image/jpeg",
-                    data: imageBase64
-                  }
-                },
-                { type: "text", text: userText }
-              ]
-            }
-          ]
+          imageBase64: imageBase64,
+          mediaType: imageMediaType || "image/jpeg",
+          memo: memoText,
+          lat: location ? location.lat : null,
+          lng: location ? location.lng : null
         })
       });
 
-      const data = await response.json();
-      const textBlock = (data.content || []).find(c => c.type === 'text');
-      if (!textBlock) throw new Error('応答を取得できませんでした。');
+      const parsed = await response.json();
 
-      let clean = textBlock.text.trim();
-      clean = clean.replace(/^```json/i, '').replace(/^```/, '').replace(/```$/, '').trim();
+      if (!response.ok || parsed.error) {
+        throw new Error(parsed.error || '診断サーバーの呼び出しに失敗しました。');
+      }
 
-      const parsed = JSON.parse(clean);
-
-      stageValue.textContent = parsed.stage || '-';
-      stageDesc.textContent = parsed.stage_desc || '';
-
-      todoList.innerHTML = '';
-      (parsed.todos || []).forEach(todo => {
-        const card = document.createElement('div');
-        card.className = `todo-card priority-${todo.priority || 'low'}`;
-        card.innerHTML = `
-          <div class="todo-head">
-            <span class="todo-icon">${iconFor(todo.category)}</span>
-            <span class="todo-title">${escapeHtml(todo.title || '')}</span>
-            <span class="todo-priority">${priorityLabel(todo.priority)}</span>
-          </div>
-          <div class="todo-detail">${escapeHtml(todo.detail || '')}</div>
-          <div class="todo-timing">${escapeHtml(todo.timing || '')}</div>
-        `;
-        todoList.appendChild(card);
-      });
-
-      noteCard.textContent = parsed.note || '';
-
-      result.classList.add('show');
-      result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      renderResult(parsed);
 
     } catch (err) {
       console.error(err);
-      errorBox.textContent = '診断中にエラーが発生しました。もう一度お試しください。';
+      if (err.name === 'AbortError') {
+        errorBox.textContent = 'サーバーの応答に時間がかかっています。少し時間をおいて、もう一度お試しください。';
+      } else if (navigator.onLine === false) {
+        errorBox.textContent = '通信が切れたようです。電波の良い場所で、もう一度お試しください。';
+      } else {
+        errorBox.textContent = '診断中にエラーが発生しました。もう一度お試しください。';
+      }
       errorBox.classList.add('show');
     } finally {
+      clearTimeout(timeoutId);
       analyzeBtn.disabled = false;
       loading.classList.remove('show');
+      stopLoadingMessages();
     }
+  });
+
+  function renderResult(parsed){
+    lastResult = parsed;
+    lastResultDate = new Date();
+
+    stageValue.textContent = parsed.stage || '-';
+    stageDesc.textContent = parsed.stage_desc || '';
+    resultDate.textContent = `診断日時：${formatDate(lastResultDate.toISOString())}`;
+
+    todoList.innerHTML = '';
+    sortByPriority(parsed.todos || []).forEach(todo => {
+      const card = document.createElement('div');
+      card.className = `todo-card priority-${todo.priority || 'low'}`;
+      card.innerHTML = `
+        <div class="todo-head">
+          <span class="todo-icon">${iconFor(todo.category)}</span>
+          <span class="todo-title">${escapeHtml(todo.title || '')}</span>
+          <span class="todo-priority">${priorityLabel(todo.priority)}</span>
+        </div>
+        <div class="todo-detail">${escapeHtml(todo.detail || '')}</div>
+        <div class="todo-timing">${escapeHtml(todo.timing || '')}</div>
+      `;
+      todoList.appendChild(card);
+    });
+
+    noteCard.textContent = parsed.note || '';
+    noteCard.style.display = parsed.note ? '' : 'none';
+
+    result.classList.add('show');
+    result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // --- 結果の共有（LINE等の共有シート／コピー） ---
+  function buildShareText(){
+    if (!lastResult) return '';
+    const lines = [];
+    lines.push(`【田んぼ診断】${formatDate(lastResultDate.toISOString())}`);
+    lines.push('');
+    lines.push(`■ 生育ステージ（推定）：${lastResult.stage || '-'}`);
+    if (lastResult.stage_desc) lines.push(lastResult.stage_desc);
+    lines.push('');
+    lines.push('■ 次にやること');
+    sortByPriority(lastResult.todos || []).forEach((todo, i) => {
+      const p = todo.priority === 'high' ? '［高］' : todo.priority === 'mid' ? '［中］' : '［低］';
+      lines.push(`${i + 1}. ${p}${todo.title || ''}${todo.timing ? `（${todo.timing}）` : ''}`);
+      if (todo.detail) lines.push(`   ${todo.detail}`);
+    });
+    if (lastResult.note) {
+      lines.push('');
+      lines.push(`※ ${lastResult.note}`);
+    }
+    lines.push('');
+    lines.push('※AIによる写真からの推定です');
+    return lines.join('\n');
+  }
+
+  shareBtn.addEventListener('click', async () => {
+    const text = buildShareText();
+    if (!text) return;
+
+    // 共有シートが使える端末（スマホ等）ではLINE等に直接送れる
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: '田んぼ診断の結果', text });
+        return;
+      } catch (e) {
+        if (e.name === 'AbortError') return; // ユーザーがキャンセルしただけ
+      }
+    }
+
+    // 使えない場合はクリップボードにコピー
+    try {
+      await navigator.clipboard.writeText(text);
+      const original = shareBtn.textContent;
+      shareBtn.textContent = '✓ コピーしました';
+      setTimeout(() => { shareBtn.textContent = original; }, 2000);
+    } catch (e) {
+      errorBox.textContent = '共有に失敗しました。お使いの端末では対応していない可能性があります。';
+      errorBox.classList.add('show');
+    }
+  });
+
+  // --- 別の写真でもう一度診断 ---
+  againBtn.addEventListener('click', () => {
+    result.classList.remove('show');
+    errorBox.classList.remove('show');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    fileInput.click();
   });
 
   function escapeHtml(str){
@@ -588,6 +1114,15 @@ todosは3〜5件にしてください。`;
       .replace(/"/g, '&quot;');
   }
 </script>
+
+<div style="text-align:center; padding: 32px 16px; border-top: 1px solid #d4c9a8; margin-top: 40px;">
+  <a href="https://nakasujit.github.io/riceman/" target="_blank"
+     style="display:inline-block; background:#5d7a3f; color:#fff; text-decoration:none;
+            padding:12px 32px; border-radius:8px; font-size:0.95rem; font-weight:700;
+            letter-spacing:1px;">
+    🌾 Riceman ランディングページへ
+  </a>
+</div>
 
 </body>
 </html>
