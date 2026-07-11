@@ -121,6 +121,11 @@
     color:#fff;
   }
   .oauth-btn.facebook:active{ background:#145fca; }
+  .oauth-btn.facebook.not-ready{
+    background:#9db9dd;
+    border-color:#9db9dd;
+    cursor:default;
+  }
 
   /* ログイン中のユーザー表示 */
   .user-bar{
@@ -421,8 +426,9 @@
         <span class="mark">G</span> Googleでログイン
       </button>
       <button type="button" class="oauth-btn facebook" id="facebookLoginBtn">
-        <span class="mark">f</span> Facebookでログイン
+        <span class="mark">f</span> Facebookでログイン（準備中）
       </button>
+      <div class="error-box" id="loginErrorBox"></div>
     </div>
   </div>
 
@@ -482,6 +488,11 @@
   // anonキーは ダッシュボード → Settings → API → 「anon public」からコピー
   //（anonキーは公開されても問題ないキーです。service_roleキーは絶対に貼らないこと）
   const SUPABASE_URL = "https://hwwwouxtffdnrsnxdrck.supabase.co";
+
+  // Facebookログインを使うには、Meta for Developers でアプリを作成し、
+  // Supabaseダッシュボード → Authentication → Sign In / Providers → Facebook を
+  // 有効化したうえで、この値を true に変えてください（ADMIN_SETUP.md 手順5参照）。
+  const FACEBOOK_ENABLED = false;
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3d3dvdXh0ZmZkbnJzbnhkcmNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxNDMyMTAsImV4cCI6MjA5ODcxOTIxMH0.gXBy0mbxJ-GwteXKqjT0-KbeDZVojiR0JYcOP9J4ryo";
 
   const ADMIN_API = `${SUPABASE_URL}/functions/v1/admin-history`;
@@ -550,7 +561,22 @@
     }
   }
   googleLoginBtn.addEventListener('click', () => loginWith('google'));
-  facebookLoginBtn.addEventListener('click', () => loginWith('facebook'));
+
+  const loginErrorBox = document.getElementById('loginErrorBox');
+  if (!FACEBOOK_ENABLED) {
+    facebookLoginBtn.classList.add('not-ready');
+  } else {
+    facebookLoginBtn.textContent = '';
+    facebookLoginBtn.innerHTML = '<span class="mark">f</span> Facebookでログイン';
+  }
+  facebookLoginBtn.addEventListener('click', () => {
+    if (!FACEBOOK_ENABLED) {
+      loginErrorBox.textContent = 'Facebookログインは現在準備中です。Googleでログインしてください。';
+      loginErrorBox.classList.add('show');
+      return;
+    }
+    loginWith('facebook');
+  });
 
   async function logout(){
     await supabase.auth.signOut();
