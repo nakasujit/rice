@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>田んぼ診断 - 管理者ページ</title>
+<style>
+  :root{
+    --paper: #f6f1e2;
+    --paper-deep: #ece3cc;
+    --ine: #5d7a3f;
+    --ine-deep: #46602e;
+    --hodo: #d4a437;
+    --tsuchi: #6b4a2b;
+    --warn: #b7282e;
+    --ink: #3a3530;
+    --ink-soft: #80766a;
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+
+  body{
+    font-family:"Noto Sans JP","Hiragino Sans",sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    min-height:100vh;
+    padding:0 0 60px;
+  }
+
+  header{
+    background: linear-gradient(180deg, var(--tsuchi) 0%, #503620 100%);
+    padding:28px 20px 22px;
+    color:#fbf8ef;
+    position:relative;
+    overflow:hidden;
+  }
+  header::after{
+    content:"";
+    position:absolute;
+    bottom:0; left:0; right:0;
+    height:14px;
+    background:repeating-linear-gradient(
+      -45deg,
+      var(--hodo) 0 10px,
+      transparent 10px 20px
+    );
+    opacity:0.5;
+  }
+  header h1{
+    font-family:"Shippori Mincho","Noto Serif JP",serif;
+    font-size:22px;
+    letter-spacing:0.12em;
+    margin-bottom:4px;
+  }
+  header p{
+    font-size:12px;
+    letter-spacing:0.1em;
+    opacity:0.85;
+  }
+
+  main{
+    max-width:480px;
+    margin:0 auto;
+    padding:22px 18px;
+  }
+
+  .section-label{
+    font-family:"Shippori Mincho","Noto Serif JP",serif;
+    font-size:14px;
+    letter-spacing:0.15em;
+    color:var(--tsuchi);
+    margin:26px 0 10px;
+  }
+
+  .card{
+    background:#fff;
+    border-radius:10px;
+    border:1px solid var(--paper-deep);
+    padding:18px;
+  }
+
+  /* ログインボタン */
+  .login-note{
+    font-size:13px;
+    line-height:1.8;
+    color:var(--ink-soft);
+    margin-bottom:16px;
+  }
+  .oauth-btn{
+    -webkit-tap-highlight-color: transparent;
+    appearance:none;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    width:100%;
+    border:1px solid var(--paper-deep);
+    background:#fff;
+    color:var(--ink);
+    font-family:inherit;
+    font-size:14px;
+    font-weight:700;
+    padding:13px 0;
+    border-radius:999px;
+    margin-bottom:10px;
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+  .oauth-btn:active{
+    background:var(--paper-deep);
+    transform:translateY(1px);
+  }
+  .oauth-btn .mark{
+    font-size:17px;
+    flex-shrink:0;
+  }
+  .oauth-btn.facebook{
+    background:#1877f2;
+    border-color:#1877f2;
+    color:#fff;
+  }
+  .oauth-btn.facebook:active{ background:#145fca; }
+
+  /* ログイン中のユーザー表示 */
+  .user-bar{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    background:#fff;
+    border:1px solid var(--paper-deep);
+    border-radius:10px;
+    padding:12px 14px;
+  }
+  .user-bar img{
+    width:38px; height:38px;
+    border-radius:50%;
+    background:var(--paper-deep);
+    flex-shrink:0;
+  }
+  .user-info{ flex:1; min-width:0; }
+  .user-name{
+    font-size:14px;
+    font-weight:700;
+  }
+  .user-email{
+    font-size:11.5px;
+    color:var(--ink-soft);
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .logout-btn{
+    -webkit-tap-highlight-color: transparent;
+    appearance:none;
+    cursor:pointer;
+    border:1px solid var(--paper-deep);
+    background:#fff;
+    color:var(--ink-soft);
+    font-family:inherit;
+    font-size:12px;
+    font-weight:700;
+    padding:8px 14px;
+    border-radius:999px;
+    flex-shrink:0;
+  }
+  .logout-btn:active{ background:var(--paper-deep); }
+
+  /* 履歴カード */
+  .history-card{
+    background:#fff;
+    border-radius:10px;
+    border:1px solid var(--paper-deep);
+    overflow:hidden;
+    margin-bottom:14px;
+  }
+  .history-card img{
+    width:100%;
+    max-height:160px;
+    object-fit:cover;
+    display:block;
+    background:var(--paper-deep);
+  }
+  .history-card-body{ padding:12px 14px; }
+  .history-date{
+    font-size:11px;
+    color:var(--ink-soft);
+    letter-spacing:0.04em;
+    margin-bottom:4px;
+  }
+  .history-stage{
+    font-family:"Shippori Mincho","Noto Serif JP",serif;
+    font-size:15px;
+    color:var(--ine-deep);
+    margin-bottom:6px;
+  }
+  .history-memo{
+    font-size:12px;
+    color:var(--ink-soft);
+    background:var(--paper-deep);
+    border-radius:6px;
+    padding:7px 10px;
+    margin-bottom:10px;
+  }
+  .delete-btn{
+    -webkit-tap-highlight-color: transparent;
+    appearance:none;
+    cursor:pointer;
+    border:1px solid var(--warn);
+    background:#fff;
+    color:var(--warn);
+    font-family:inherit;
+    font-size:12.5px;
+    font-weight:700;
+    padding:9px 18px;
+    border-radius:999px;
+    transition: background 0.15s ease;
+  }
+  .delete-btn:active{ background:#fbe9e6; }
+  .delete-btn:disabled{ opacity:0.5; cursor:default; }
+
+  /* 操作ログ */
+  .audit-item{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    font-size:12.5px;
+    line-height:1.6;
+    padding:9px 2px;
+    border-bottom:1px dashed var(--paper-deep);
+  }
+  .audit-item:last-child{ border-bottom:none; }
+  .audit-when{
+    font-size:11px;
+    color:var(--ink-soft);
+  }
+  .audit-who{ font-weight:700; }
+  .audit-action-delete{ color:var(--warn); font-weight:700; }
+  .audit-action-login{ color:var(--ine-deep); }
+  .audit-action-denied{ color:var(--hodo); font-weight:700; }
+
+  .refresh-btn{
+    -webkit-tap-highlight-color: transparent;
+    appearance:none;
+    cursor:pointer;
+    border:1px solid var(--paper-deep);
+    background:#fff;
+    color:var(--ink-soft);
+    font-family:inherit;
+    font-size:12px;
+    font-weight:700;
+    padding:8px 16px;
+    border-radius:999px;
+    margin-bottom:12px;
+  }
+  .refresh-btn:active{ background:var(--paper-deep); }
+
+  .empty{
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:13px;
+    padding:26px 0;
+  }
+
+  .loading{
+    display:none;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    margin:14px 0;
+    font-size:13px;
+    color:var(--ink-soft);
+  }
+  .loading.show{ display:flex; }
+  .spinner{
+    width:18px; height:18px;
+    border:3px solid var(--paper-deep);
+    border-top-color:var(--tsuchi);
+    border-radius:50%;
+    animation: spin 0.8s linear infinite;
+    flex-shrink:0;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  .error-box{
+    display:none;
+    margin:14px 0;
+    background:#fbe9e6;
+    border:1px solid var(--warn);
+    color:var(--warn);
+    border-radius:8px;
+    padding:12px 14px;
+    font-size:13px;
+    line-height:1.6;
+  }
+  .error-box.show{ display:block; }
+
+  .denied-card{
+    background:#fff;
+    border:1px solid var(--hodo);
+    border-radius:10px;
+    padding:18px;
+    font-size:13px;
+    line-height:1.9;
+  }
+  .denied-card strong{ color:var(--warn); }
+  .denied-card .logout-btn{ margin-top:12px; }
+
+  footer{
+    text-align:center;
+    font-size:11px;
+    color:var(--ink-soft);
+    margin-top:34px;
+    letter-spacing:0.05em;
+    line-height:1.8;
+  }
+  footer a{ color:var(--ine-deep); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>田んぼ診断　管理者ページ</h1>
+  <p>履歴の管理・操作ログの確認</p>
+</header>
+
+<main>
+
+  <div class="error-box" id="configErrorBox"></div>
+
+  <!-- ログイン前 -->
+  <div id="loginView" style="display:none;">
+    <div class="section-label">管理者ログイン</div>
+    <div class="card">
+      <p class="login-note">
+        このページは管理者専用です。<br>
+        登録済みのGoogleまたはFacebookアカウントでログインしてください。
+        ログイン・削除などの操作は、すべて記録されます。
+      </p>
+      <button type="button" class="oauth-btn" id="googleLoginBtn">
+        <span class="mark">G</span> Googleでログイン
+      </button>
+      <button type="button" class="oauth-btn facebook" id="facebookLoginBtn">
+        <span class="mark">f</span> Facebookでログイン
+      </button>
+    </div>
+  </div>
+
+  <!-- ログイン済みだが管理者ではない -->
+  <div id="deniedView" style="display:none;">
+    <div class="section-label">アクセスできません</div>
+    <div class="denied-card">
+      <strong>このアカウントには管理者権限がありません。</strong><br>
+      <span id="deniedEmail"></span> でログインしています。<br>
+      管理者として登録されたアカウントでログインし直してください。<br>
+      ※ このアクセスは記録されました。
+      <br>
+      <button type="button" class="logout-btn" id="deniedLogoutBtn">別のアカウントでログインする</button>
+    </div>
+  </div>
+
+  <!-- 管理者ビュー -->
+  <div id="adminView" style="display:none;">
+
+    <div class="user-bar">
+      <img id="userAvatar" alt="" referrerpolicy="no-referrer">
+      <div class="user-info">
+        <div class="user-name" id="userName">-</div>
+        <div class="user-email" id="userEmail">-</div>
+      </div>
+      <button type="button" class="logout-btn" id="logoutBtn">ログアウト</button>
+    </div>
+
+    <div class="section-label">診断履歴の管理</div>
+    <button type="button" class="refresh-btn" id="historyRefreshBtn">🔄 一覧を更新</button>
+    <div class="loading" id="historyLoading">
+      <div class="spinner"></div><span>読み込んでいます…</span>
+    </div>
+    <div class="error-box" id="historyErrorBox"></div>
+    <div id="historyList"></div>
+
+    <div class="section-label">操作ログ（誰が・いつ・何をしたか）</div>
+    <button type="button" class="refresh-btn" id="auditRefreshBtn">🔄 ログを更新</button>
+    <div class="loading" id="auditLoading">
+      <div class="spinner"></div><span>読み込んでいます…</span>
+    </div>
+    <div class="error-box" id="auditErrorBox"></div>
+    <div class="card" id="auditList"></div>
+
+  </div><!-- /adminView -->
+
+</main>
+
+<footer>
+  <a href="./ine_todo.html">← 田んぼ診断アプリへ戻る</a>
+</footer>
+
+<script type="module">
+  import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+  // ↓↓↓ あなたの Supabase プロジェクトの設定に書き換えてください ↓↓↓
+  // anonキーは ダッシュボード → Settings → API → 「anon public」からコピー
+  //（anonキーは公開されても問題ないキーです。service_roleキーは絶対に貼らないこと）
+  const SUPABASE_URL = "https://hwwwouxtffdnrsnxdrck.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3d3dvdXh0ZmZkbnJzbnhkcmNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxNDMyMTAsImV4cCI6MjA5ODcxOTIxMH0.gXBy0mbxJ-GwteXKqjT0-KbeDZVojiR0JYcOP9J4ryo";
+
+  const ADMIN_API = `${SUPABASE_URL}/functions/v1/admin-history`;
+
+  const configErrorBox = document.getElementById('configErrorBox');
+  const loginView = document.getElementById('loginView');
+  const deniedView = document.getElementById('deniedView');
+  const deniedEmail = document.getElementById('deniedEmail');
+  const adminView = document.getElementById('adminView');
+  const googleLoginBtn = document.getElementById('googleLoginBtn');
+  const facebookLoginBtn = document.getElementById('facebookLoginBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const deniedLogoutBtn = document.getElementById('deniedLogoutBtn');
+  const userAvatar = document.getElementById('userAvatar');
+  const userName = document.getElementById('userName');
+  const userEmail = document.getElementById('userEmail');
+  const historyRefreshBtn = document.getElementById('historyRefreshBtn');
+  const historyLoading = document.getElementById('historyLoading');
+  const historyErrorBox = document.getElementById('historyErrorBox');
+  const historyList = document.getElementById('historyList');
+  const auditRefreshBtn = document.getElementById('auditRefreshBtn');
+  const auditLoading = document.getElementById('auditLoading');
+  const auditErrorBox = document.getElementById('auditErrorBox');
+  const auditList = document.getElementById('auditList');
+
+  // anonキーが未設定なら案内を出して止まる
+  if (!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.includes('ここに')) {
+    configErrorBox.textContent = '設定が未完了です：admin.html の SUPABASE_ANON_KEY に、Supabaseダッシュボード（Settings → API）の anon public キーを貼り付けてください。';
+    configErrorBox.classList.add('show');
+    throw new Error('SUPABASE_ANON_KEY not set');
+  }
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  function show(view){
+    loginView.style.display = view === 'login' ? '' : 'none';
+    deniedView.style.display = view === 'denied' ? '' : 'none';
+    adminView.style.display = view === 'admin' ? '' : 'none';
+  }
+
+  function escapeHtml(str){
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function formatDate(iso){
+    const d = new Date(iso);
+    return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  }
+
+  // --- ログイン ---
+  async function loginWith(provider){
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        // ログイン後にこの管理者ページへ戻ってくる
+        redirectTo: window.location.origin + window.location.pathname,
+      },
+    });
+    if (error) {
+      configErrorBox.textContent = `ログインに失敗しました：${error.message}`;
+      configErrorBox.classList.add('show');
+    }
+  }
+  googleLoginBtn.addEventListener('click', () => loginWith('google'));
+  facebookLoginBtn.addEventListener('click', () => loginWith('facebook'));
+
+  async function logout(){
+    await supabase.auth.signOut();
+    show('login');
+  }
+  logoutBtn.addEventListener('click', logout);
+  deniedLogoutBtn.addEventListener('click', logout);
+
+  // --- 管理APIの呼び出し（ログイン中のトークンを添えて送る） ---
+  async function api(method, query = '', body = null){
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      show('login');
+      throw new Error('not_signed_in');
+    }
+    const res = await fetch(ADMIN_API + query, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.status === 401) {
+      show('login');
+      throw new Error('unauthorized');
+    }
+    if (res.status === 403) {
+      deniedEmail.textContent = session.user.email || '';
+      show('denied');
+      throw new Error('forbidden');
+    }
+    if (!res.ok) {
+      throw new Error(data.error || 'サーバーエラーが発生しました');
+    }
+    return data;
+  }
+
+  // --- ログインを操作ログに記録（同じセッションでは1回だけ） ---
+  async function recordLoginOnce(session){
+    const key = `ine_admin_login_logged_${session.user.id}`;
+    try {
+      if (sessionStorage.getItem(key)) return;
+      sessionStorage.setItem(key, '1');
+    } catch (e) { /* sessionStorageが使えなくても続行 */ }
+    try {
+      await api('POST', '?action=login');
+    } catch (e) { /* 権限なし等はここでは無視（画面側で表示済み） */ }
+  }
+
+  // --- 履歴一覧 ---
+  async function loadHistory(){
+    historyErrorBox.classList.remove('show');
+    historyList.innerHTML = '';
+    historyLoading.classList.add('show');
+    try {
+      const data = await api('GET');
+      renderHistory(data.items || []);
+    } catch (err) {
+      if (!['forbidden','unauthorized','not_signed_in'].includes(err.message)) {
+        historyErrorBox.textContent = '履歴の読み込みに失敗しました。もう一度お試しください。';
+        historyErrorBox.classList.add('show');
+      }
+    } finally {
+      historyLoading.classList.remove('show');
+    }
+  }
+
+  function renderHistory(items){
+    if (!items.length) {
+      historyList.innerHTML = '<div class="empty">診断履歴はありません。</div>';
+      return;
+    }
+    historyList.innerHTML = '';
+    items.forEach(item => {
+      const result = item.result || {};
+      const card = document.createElement('div');
+      card.className = 'history-card';
+      card.innerHTML = `
+        ${item.image_url ? `<img src="${item.image_url}" alt="診断時の写真" loading="lazy">` : ''}
+        <div class="history-card-body">
+          <div class="history-date">#${item.id}　${formatDate(item.created_at)}</div>
+          <div class="history-stage">${escapeHtml(result.stage || item.stage || '-')}</div>
+          ${item.memo ? `<div class="history-memo">${escapeHtml(item.memo)}</div>` : ''}
+          <button type="button" class="delete-btn" data-id="${item.id}">🗑 この履歴を削除</button>
+        </div>
+      `;
+      card.querySelector('.delete-btn').addEventListener('click', (e) => deleteHistory(item, e.currentTarget));
+      historyList.appendChild(card);
+    });
+  }
+
+  // --- 削除（確認 → API → 一覧とログを更新） ---
+  async function deleteHistory(item, btn){
+    const label = `${formatDate(item.created_at)}（${(item.result && item.result.stage) || item.stage || '-'}）`;
+    if (!window.confirm(`この履歴を削除しますか？\n\n${label}\n\n写真も一緒に削除され、元に戻せません。`)) {
+      return;
+    }
+    btn.disabled = true;
+    btn.textContent = '削除しています…';
+    try {
+      await api('DELETE', '', { id: item.id });
+      await loadHistory();
+      await loadAudit();
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = '🗑 この履歴を削除';
+      if (!['forbidden','unauthorized','not_signed_in'].includes(err.message)) {
+        historyErrorBox.textContent = `削除に失敗しました：${err.message}`;
+        historyErrorBox.classList.add('show');
+      }
+    }
+  }
+
+  // --- 操作ログ ---
+  const actionLabels = {
+    login: 'ログインしました',
+    delete: '履歴を削除しました',
+    denied: '権限のないアクセスがありました',
+  };
+
+  async function loadAudit(){
+    auditErrorBox.classList.remove('show');
+    auditList.innerHTML = '';
+    auditLoading.classList.add('show');
+    try {
+      const data = await api('GET', '?action=audit');
+      renderAudit(data.items || []);
+    } catch (err) {
+      if (!['forbidden','unauthorized','not_signed_in'].includes(err.message)) {
+        auditErrorBox.textContent = '操作ログの読み込みに失敗しました。';
+        auditErrorBox.classList.add('show');
+      }
+    } finally {
+      auditLoading.classList.remove('show');
+    }
+  }
+
+  function renderAudit(items){
+    if (!items.length) {
+      auditList.innerHTML = '<div class="empty">まだ操作ログはありません。</div>';
+      return;
+    }
+    auditList.innerHTML = '';
+    items.forEach(item => {
+      const who = item.user_name
+        ? `${item.user_name}（${item.user_email || '-'}）`
+        : (item.user_email || '不明なユーザー');
+      const provider = item.provider ? `［${item.provider}］` : '';
+      const what = actionLabels[item.action] || item.action;
+      const target = item.target_id ? `　対象：履歴 #${item.target_id}` : '';
+      const stage = item.detail && item.detail.stage ? `（${item.detail.stage}）` : '';
+      const row = document.createElement('div');
+      row.className = 'audit-item';
+      row.innerHTML = `
+        <span class="audit-when">${formatDate(item.created_at)}</span>
+        <span><span class="audit-who">${escapeHtml(who)}</span>${escapeHtml(provider)}
+        <span class="audit-action-${escapeHtml(item.action)}">${escapeHtml(what)}</span>${escapeHtml(target)}${escapeHtml(stage)}</span>
+      `;
+      auditList.appendChild(row);
+    });
+  }
+
+  historyRefreshBtn.addEventListener('click', loadHistory);
+  auditRefreshBtn.addEventListener('click', loadAudit);
+
+  // --- 起動時：ログイン状態を確認して画面を切り替える ---
+  async function boot(){
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      show('login');
+      return;
+    }
+    userName.textContent = session.user.user_metadata?.full_name
+      || session.user.user_metadata?.name
+      || '管理者';
+    userEmail.textContent = session.user.email || '';
+    const avatar = session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture;
+    if (avatar) userAvatar.src = avatar; else userAvatar.style.display = 'none';
+
+    show('admin');
+    await recordLoginOnce(session);
+    await loadHistory();
+    await loadAudit();
+  }
+
+  supabase.auth.onAuthStateChange((event) => {
+    if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+      boot();
+    }
+  });
+
+  boot();
+</script>
+
+</body>
+</html>
