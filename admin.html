@@ -219,6 +219,85 @@
   .delete-btn:active{ background:#fbe9e6; }
   .delete-btn:disabled{ opacity:0.5; cursor:default; }
 
+  /* メモ編集 */
+  .card-actions{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .edit-btn{
+    -webkit-tap-highlight-color: transparent;
+    appearance:none;
+    cursor:pointer;
+    border:1px solid var(--ine);
+    background:#fff;
+    color:var(--ine-deep);
+    font-family:inherit;
+    font-size:12.5px;
+    font-weight:700;
+    padding:9px 18px;
+    border-radius:999px;
+    transition: background 0.15s ease;
+  }
+  .edit-btn:active{ background:var(--paper-deep); }
+  .edit-btn:disabled{ opacity:0.5; cursor:default; }
+  .memo-edit{
+    display:none;
+    margin-bottom:10px;
+  }
+  .memo-edit.show{ display:block; }
+  .memo-edit textarea{
+    width:100%;
+    border:1px solid var(--ine);
+    border-radius:8px;
+    background:#fff;
+    padding:10px 12px;
+    font-family:inherit;
+    font-size:13px;
+    color:var(--ink);
+    resize:vertical;
+    min-height:56px;
+    margin-bottom:8px;
+    line-height:1.6;
+  }
+  .memo-edit textarea:focus{
+    outline:2px solid var(--ine);
+    outline-offset:1px;
+  }
+  .memo-edit-actions{
+    display:flex;
+    gap:8px;
+  }
+  .memo-save-btn{
+    -webkit-tap-highlight-color: transparent;
+    appearance:none;
+    cursor:pointer;
+    border:none;
+    background:var(--ine);
+    color:#fff;
+    font-family:inherit;
+    font-size:12.5px;
+    font-weight:700;
+    padding:9px 20px;
+    border-radius:999px;
+  }
+  .memo-save-btn:active{ background:var(--ine-deep); }
+  .memo-save-btn:disabled{ opacity:0.5; cursor:default; }
+  .memo-cancel-btn{
+    -webkit-tap-highlight-color: transparent;
+    appearance:none;
+    cursor:pointer;
+    border:1px solid var(--paper-deep);
+    background:#fff;
+    color:var(--ink-soft);
+    font-family:inherit;
+    font-size:12.5px;
+    font-weight:700;
+    padding:9px 20px;
+    border-radius:999px;
+  }
+  .memo-cancel-btn:active{ background:var(--paper-deep); }
+
   /* 操作ログ */
   .audit-item{
     display:flex;
@@ -236,6 +315,7 @@
   }
   .audit-who{ font-weight:700; }
   .audit-action-delete{ color:var(--warn); font-weight:700; }
+  .audit-action-edit{ color:var(--tsuchi); font-weight:700; }
   .audit-action-login{ color:var(--ine-deep); }
   .audit-action-denied{ color:var(--hodo); font-weight:700; }
 
@@ -555,11 +635,62 @@
         <div class="history-card-body">
           <div class="history-date">#${item.id}　${formatDate(item.created_at)}</div>
           <div class="history-stage">${escapeHtml(result.stage || item.stage || '-')}</div>
-          ${item.memo ? `<div class="history-memo">${escapeHtml(item.memo)}</div>` : ''}
-          <button type="button" class="delete-btn" data-id="${item.id}">🗑 この履歴を削除</button>
+          <div class="history-memo memo-view" ${item.memo ? '' : 'style="display:none;"'}>${escapeHtml(item.memo || '')}</div>
+          <div class="memo-edit">
+            <textarea placeholder="状況メモ（空欄で保存するとメモを削除します）"></textarea>
+            <div class="memo-edit-actions">
+              <button type="button" class="memo-save-btn">保存する</button>
+              <button type="button" class="memo-cancel-btn">キャンセル</button>
+            </div>
+          </div>
+          <div class="card-actions">
+            <button type="button" class="edit-btn">✏ メモを編集</button>
+            <button type="button" class="delete-btn" data-id="${item.id}">🗑 この履歴を削除</button>
+          </div>
         </div>
       `;
       card.querySelector('.delete-btn').addEventListener('click', (e) => deleteHistory(item, e.currentTarget));
+
+      // --- メモ編集の開閉と保存 ---
+      const memoView = card.querySelector('.memo-view');
+      const memoEdit = card.querySelector('.memo-edit');
+      const memoTextarea = memoEdit.querySelector('textarea');
+      const editBtn = card.querySelector('.edit-btn');
+      const saveBtn = memoEdit.querySelector('.memo-save-btn');
+      const cancelBtn = memoEdit.querySelector('.memo-cancel-btn');
+
+      editBtn.addEventListener('click', () => {
+        memoTextarea.value = item.memo || '';
+        memoEdit.classList.add('show');
+        memoView.style.display = 'none';
+        editBtn.disabled = true;
+        memoTextarea.focus();
+      });
+
+      cancelBtn.addEventListener('click', () => {
+        memoEdit.classList.remove('show');
+        memoView.style.display = item.memo ? '' : 'none';
+        editBtn.disabled = false;
+      });
+
+      saveBtn.addEventListener('click', async () => {
+        const newMemo = memoTextarea.value.trim();
+        saveBtn.disabled = true;
+        saveBtn.textContent = '保存しています…';
+        try {
+          await api('PATCH', '', { id: item.id, memo: newMemo });
+          await loadHistory();
+          await loadAudit();
+        } catch (err) {
+          saveBtn.disabled = false;
+          saveBtn.textContent = '保存する';
+          if (!['forbidden','unauthorized','not_signed_in'].includes(err.message)) {
+            historyErrorBox.textContent = `メモの保存に失敗しました：${err.message}`;
+            historyErrorBox.classList.add('show');
+          }
+        }
+      });
+
       historyList.appendChild(card);
     });
   }
@@ -589,6 +720,7 @@
   // --- 操作ログ ---
   const actionLabels = {
     login: 'ログインしました',
+    edit: 'メモを編集しました',
     delete: '履歴を削除しました',
     denied: '権限のないアクセスがありました',
   };
